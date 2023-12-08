@@ -12,6 +12,7 @@
     <p>@Questions[i].Text</p>
     <p>Оставшееся время для ответа: @timeLeft</p>
     <InputNumber id="@($"answer{i}")" @bind-Value="UserAnswer" />
+    <p>Правильные: @right</p>
     @if (i+1 == Questions.Length)
     {
         <button type="submit" class="btn btn-primary" @onclick="IncrementCount">Сдать работу</button>
@@ -79,6 +80,7 @@
             else if (i + 1 == Questions.Length)
             {
                 timer.Stop();
+                IncrementCount();
                 UpdateStudent();
             }
             else
