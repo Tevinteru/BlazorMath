@@ -1,0 +1,121 @@
+﻿@page "/test/{id}"
+@using Microsoft.EntityFrameworkCore;
+@rendermode InteractiveServer
+@inject DataContext Context
+@inject NavigationManager NavigationManager
+@using static BlazorMath.Components.Pages.StudentsOverview;
+
+<h3>Test</h3>
+
+<EditForm Model="Questions" OnSubmit="UpdateStudent" FormName="Test">
+
+    <p>@Questions[i].Text</p>
+    <p>Оставшееся время для ответа: @timeLeft</p>
+    <InputNumber id="@($"answer{i}")" @bind-Value="UserAnswer" />
+    @if (i+1 == Questions.Length)
+    {
+        <button type="submit" class="btn btn-primary" @onclick="IncrementCount">Сдать работу</button>
+    }
+    else
+    {
+
+        <button type="button" class="btn btn-primary" @onclick="IncrementCount">Следующий</button>
+    }
+</EditForm>
+
+
+
+
+@code {
+    private int right = 0;
+    private int i = 0;
+    private System.Timers.Timer timer;
+    private int timeLeft = 10; // Время в секундах
+
+    [SupplyParameterFromForm]
+    public int UserAnswer { get; set; }
+    [Parameter]
+    public string? id { get; set; }
+    public Student? Student { get; set; }
+    private Question[] Questions = new Question[]
+    {
+        new Question { Text = "Сколько будет 2+2?", RightAnswer=4 },
+        new Question { Text = "Сколько будет 5*5?" , RightAnswer=25 },
+        new Question { Text = "Сколько будет 10/2?" , RightAnswer=5 },
+        new Question { Text = "Сколько будет 3^3?" , RightAnswer=27   },
+        new Question { Text = "Сколько будет √16?", RightAnswer=4  }
+    };
+
+    public class Question
+    {
+        public string Text { get; set; }
+        public int RightAnswer { get; set; }
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Получите студента по id из базы данных
+        Student = await Context.Students.FindAsync(int.Parse(id));
+    }
+
+
+    protected override void OnInitialized()
+    {
+        timer = new System.Timers.Timer(1000); // Установите интервал таймера в 1 секунду
+        timer.Elapsed += OnTimerElapsed;
+        timer.AutoReset = true;
+        timer.Enabled = true;
+    }
+
+    private void OnTimerElapsed(Object source, System.Timers.ElapsedEventArgs e)
+    {
+        InvokeAsync(() =>
+        {
+            if (timeLeft > 0)
+            {
+                timeLeft--;
+            }
+            else if (i + 1 == Questions.Length)
+            {
+                timer.Stop();
+                UpdateStudent();
+            }
+            else
+            {
+                IncrementCount();
+            }
+            StateHasChanged(); // Уведомите Blazor, что состояние изменилось
+        });
+    }
+
+    public void Dispose()
+    {
+        timer?.Dispose();
+    }
+
+    async Task UpdateStudent()
+    {
+        await CheckTest();
+
+    }
+    async Task CheckTest()
+    {
+        Student.Количество_прав_ответов = right;
+        Student.Время_конца = DateTime.Now;
+        await Context.SaveChangesAsync();
+        NavigationManager.NavigateTo($"/result/{id}");
+    }
+    private void IncrementCount()
+    {
+        if (UserAnswer == Questions[i].RightAnswer)
+        {
+            right++;
+        }
+        if (i + 1 != Questions.Length)
+        {
+            i++;
+        }
+        timeLeft = 10;
+    }
+}

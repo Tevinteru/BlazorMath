@@ -1,0 +1,45 @@
+﻿@page "/students"
+@using Microsoft.EntityFrameworkCore
+@inject DataContext Context
+@inject NavigationManager NavigationManager
+<h3>StudentsOverview</h3>
+
+
+<EditForm Model="student" OnSubmit="Start" FormName="Testing">
+    <div>
+        <label>Фамилия</label>
+        <InputText id="fam" @bind-Value="student.Фамилия" class="form-control"></InputText>
+    </div>
+    <div>
+        <label>Класс</label>
+        <InputText id="class" @bind-Value="student.Класс" class="form-control"></InputText>
+    </div>
+        <button type="submit" class="bs-tooltip-start">Начать</button>
+</EditForm>
+@code {
+    [Parameter]
+    public int? id { get; set; } = null;
+    [SupplyParameterFromForm]
+    public Student student { get; set; } = new();
+
+    async Task Start()
+    {
+
+        if (id is not null)
+        {
+            //update
+        }
+        else
+        {
+
+            await CreateStart();
+        }
+    }
+    async Task CreateStart()
+    {
+        student.Время_начала = DateTime.Now;
+        Context.Students.Add(student);
+        await Context.SaveChangesAsync();
+        NavigationManager.NavigateTo($"/test/{ student.Id}");
+    }
+}

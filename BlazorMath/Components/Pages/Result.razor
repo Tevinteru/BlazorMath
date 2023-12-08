@@ -1,0 +1,34 @@
+﻿@page "/result/{id}"
+@using Microsoft.EntityFrameworkCore;
+@rendermode InteractiveServer
+@inject DataContext Context
+@inject NavigationManager NavigationManager
+@using static BlazorMath.Components.Pages.Test;
+<h3>Результат</h3>
+
+<div>
+    @if (Student != null)
+    {
+        @if (Student.Количество_прав_ответов < 3)
+        {
+            <p>Плохо, вы ответили всего лишь на @Student.Количество_прав_ответов </p>
+        }
+        else
+        {
+            <p>Неплохо, вы ответили на @Student.Количество_прав_ответов</p>
+        }
+    }
+   
+   
+</div>
+
+@code {
+    [Parameter]
+    public string? id { get; set; }
+    public Student? Student { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        // Получите студента по id из базы данных
+        Student = await Context.Students.FindAsync(int.Parse(id));
+    }
+}
