@@ -13,6 +13,11 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Syncfusion.Blazor.Core" Version="23.2.7" />
+    <PackageReference Include="Syncfusion.Blazor.Data" Version="23.2.7" />
+    <PackageReference Include="Syncfusion.DocIO.Net.Core" Version="23.2.7" />
+    <PackageReference Include="Syncfusion.DocIORenderer.Net.Core" Version="23.2.7" />
+    <PackageReference Include="Syncfusion.Licensing" Version="23.2.7" />
   </ItemGroup>
 
 </Project>

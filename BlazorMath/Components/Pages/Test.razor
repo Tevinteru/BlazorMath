@@ -7,20 +7,20 @@
 
 <h3>Test</h3>
 
-<EditForm Model="Questions" OnSubmit="UpdateStudent" FormName="Test">
+<EditForm Model="word.Questions" OnSubmit="CheckTest" FormName="Test">
 
-    <p>@Questions[i].Text</p>
+    <p>@word.Questions[i].Text</p>
     <p>Оставшееся время для ответа: @timeLeft</p>
     <InputNumber id="@($"answer{i}")" @bind-Value="UserAnswer" />
     <p>Правильные: @right</p>
-    @if (i+1 == Questions.Length)
+    @if (i + 1 == word.Questions.Length)
     {
-        <button type="submit" class="btn btn-primary" @onclick="IncrementCount">Сдать работу</button>
+    <button type="submit" class="btn btn-primary" @onclick="IncrementCount">Сдать работу</button>
     }
     else
     {
 
-        <button type="button" class="btn btn-primary" @onclick="IncrementCount">Следующий</button>
+    <button type="button" class="btn btn-primary" @onclick="IncrementCount">Следующий</button>
     }
 </EditForm>
 
@@ -33,29 +33,17 @@
     private System.Timers.Timer timer;
     private int timeLeft = 10; // Время в секундах
 
+
+
     [SupplyParameterFromForm]
     public int UserAnswer { get; set; }
     [Parameter]
     public string? id { get; set; }
     public Student? Student { get; set; }
-    private Question[] Questions = new Question[]
-    {
-        new Question { Text = "Сколько будет 2+2?", RightAnswer=4 },
-        new Question { Text = "Сколько будет 5*5?" , RightAnswer=25 },
-        new Question { Text = "Сколько будет 10/2?" , RightAnswer=5 },
-        new Question { Text = "Сколько будет 3^3?" , RightAnswer=27   },
-        new Question { Text = "Сколько будет √16?", RightAnswer=4  }
-    };
-
-    public class Question
-    {
-        public string Text { get; set; }
-        public int RightAnswer { get; set; }
-    }
-
-
+    Methods word = new Methods();
     protected override async Task OnInitializedAsync()
     {
+
         // Получите студента по id из базы данных
         Student = await Context.Students.FindAsync(int.Parse(id));
     }
@@ -63,6 +51,7 @@
 
     protected override void OnInitialized()
     {
+        word.Init();
         timer = new System.Timers.Timer(1000); // Установите интервал таймера в 1 секунду
         timer.Elapsed += OnTimerElapsed;
         timer.AutoReset = true;
@@ -77,11 +66,11 @@
             {
                 timeLeft--;
             }
-            else if (i + 1 == Questions.Length)
+            else if (i + 1 == word.Questions.Length)
             {
                 timer.Stop();
                 IncrementCount();
-                UpdateStudent();
+                CheckTest();
             }
             else
             {
@@ -96,11 +85,6 @@
         timer?.Dispose();
     }
 
-    async Task UpdateStudent()
-    {
-        await CheckTest();
-
-    }
     async Task CheckTest()
     {
         Student.Количество_прав_ответов = right;
@@ -110,11 +94,11 @@
     }
     private void IncrementCount()
     {
-        if (UserAnswer == Questions[i].RightAnswer)
+        if (UserAnswer == word.Questions[i].RightAnswer)
         {
             right++;
         }
-        if (i + 1 != Questions.Length)
+        if (i + 1 != word.Questions.Length)
         {
             i++;
         }
